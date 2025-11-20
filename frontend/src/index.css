@@ -1,0 +1,130 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
+  transition: background 0.3s ease;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+/* 平滑过渡效果 */
+.ant-card,
+.ant-table,
+.ant-modal,
+.ant-drawer,
+.ant-menu-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 表格圆角优化 */
+.ant-table-wrapper .ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f9fafb;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #f9fafb !important;
+}
+
+/* 按钮圆角优化 */
+.ant-btn {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.ant-btn:active {
+  transform: translateY(0);
+}
+
+/* 输入框圆角优化 */
+.ant-input,
+.ant-input-number,
+.ant-select-selector {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: #4f8ff7;
+  box-shadow: 0 0 0 2px rgba(79, 143, 247, 0.1);
+}
+
+/* 卡片阴影优化 */
+.ant-card {
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* 菜单项圆角优化 */
+.ant-menu-item {
+  border-radius: 8px;
+  margin: 4px 8px;
+}
+
+.ant-menu-item-selected {
+  background: #eff6ff !important;
+  color: #4f8ff7 !important;
+}
+
+.ant-menu-item:hover {
+  background: #f3f4f6 !important;
+}
+
+/* Modal和Drawer圆角优化 */
+.ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ant-drawer-content {
+  border-radius: 16px 0 0 16px;
+}
+
+/* 标签圆角优化 */
+.ant-tag {
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,986 @@
+================================================================================
+智慧煤矿ERP管理系统 - API测试用例（核心版）
+================================================================================
+
+本文件包含系统核心模块的API测试用例，用于接口功能测试和演示。
+
+测试环境：
+- 后端地址：http://localhost:8080
+- 测试账户：admin / admin123
+
+================================================================================
+一、认证模块
+================================================================================
+
+【用例1.1】用户登录
+------------------
+接口地址：POST /api/auth/login
+请求头：
+  Content-Type: application/json
+
+请求体：
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "userInfo": {
+      "userId": 1,
+      "username": "admin",
+      "nickName": "系统管理员",
+      "avatar": ""
+    },
+    "permissions": ["*:*:*"]
+  }
+}
+
+测试步骤：
+1. 发送POST请求到 /api/auth/login
+2. 在请求体中填入用户名和密码
+3. 获取返回的token，保存用于后续请求
+4. 验证返回状态码为200
+5. 验证返回数据中包含token和userInfo
+
+【用例1.2】用户登出
+------------------
+接口地址：POST /api/auth/logout
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+请求体：无
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": null
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送POST请求到 /api/auth/logout
+3. 验证返回状态码为200
+
+================================================================================
+二、采购模块
+================================================================================
+
+【用例2.1】采购申请 - 分页查询
+------------------------------
+接口地址：GET /api/purchase/requisition/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1 (当前页，默认1)
+  size: 10 (每页数量，默认10)
+  requisitionNo: (可选，申请单号)
+  status: (可选，状态)
+
+完整URL示例：
+GET http://localhost:8080/api/purchase/requisition/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "requisitionId": 1,
+        "requisitionNo": "CG202412001",
+        "requisitionName": "防爆电机采购申请",
+        "totalAmount": 150000.00,
+        "status": "APPROVED",
+        "createTime": "2024-12-01 09:00:00"
+      }
+    ],
+    "total": 5,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/purchase/requisition/page
+3. 添加查询参数（可选）
+4. 验证返回状态码为200
+5. 验证返回数据中包含分页信息
+
+【用例2.2】采购申请 - 创建
+--------------------------
+接口地址：POST /api/purchase/requisition
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+请求体：
+{
+  "requisition": {
+    "requisitionName": "测试采购申请",
+    "deptId": 5,
+    "deptName": "采购部",
+    "applicantId": 1,
+    "applicantName": "采购员",
+    "totalAmount": 50000.00,
+    "urgentLevel": "NORMAL",
+    "purpose": "测试用途",
+    "status": "DRAFT"
+  },
+  "details": [
+    {
+      "itemName": "测试物料",
+      "itemCode": "TEST001",
+      "specification": "规格1",
+      "unit": "件",
+      "quantity": 100.00,
+      "estimatedPrice": 500.00,
+      "estimatedAmount": 50000.00,
+      "requiredDate": "2024-12-31"
+    }
+  ]
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "requisitionId": 6,
+    "requisitionNo": "CG202412006"
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 准备请求体数据
+3. 发送POST请求到 /api/purchase/requisition
+4. 验证返回状态码为200
+5. 验证返回数据中包含新创建的申请ID和单号
+
+【用例2.3】采购申请 - 提交审批
+------------------------------
+接口地址：POST /api/purchase/requisition/{id}/submit
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+路径参数：
+  id: 采购申请ID（例如：1）
+
+完整URL示例：
+POST http://localhost:8080/api/purchase/requisition/1/submit
+
+请求体：无
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": null
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 使用已创建的采购申请ID
+3. 发送POST请求到 /api/purchase/requisition/{id}/submit
+4. 验证返回状态码为200
+5. 验证申请状态已更新为SUBMITTED
+
+【用例2.4】采购订单 - 分页查询
+------------------------------
+接口地址：GET /api/purchase/order/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  orderNo: (可选)
+  status: (可选)
+  supplierName: (可选)
+
+完整URL示例：
+GET http://localhost:8080/api/purchase/order/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "orderId": 1,
+        "orderNo": "CGDD202412001",
+        "supplierName": "山东防爆电机厂",
+        "totalAmount": 150000.00,
+        "status": "RECEIVED",
+        "orderDate": "2024-12-02"
+      }
+    ],
+    "total": 5,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/purchase/order/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含订单列表
+
+【用例2.5】采购收货 - 分页查询
+------------------------------
+接口地址：GET /api/purchase/receiving/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  receivingNo: (可选)
+  orderNo: (可选)
+  status: (可选)
+
+完整URL示例：
+GET http://localhost:8080/api/purchase/receiving/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "receivingId": 1,
+        "receivingNo": "CGSH202412001",
+        "orderNo": "CGDD202412001",
+        "supplierName": "山东防爆电机厂",
+        "totalAmount": 150000.00,
+        "status": "STORED",
+        "receivingDate": "2024-12-20"
+      }
+    ],
+    "total": 1,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/purchase/receiving/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含收货单列表
+
+================================================================================
+三、库存模块
+================================================================================
+
+【用例3.1】库存查询 - 分页查询
+------------------------------
+接口地址：GET /api/inventory/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  materialCode: (可选，物料编码)
+  materialName: (可选，物料名称)
+
+完整URL示例：
+GET http://localhost:8080/api/inventory/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "materialCode": "WL001",
+        "materialName": "防爆电机",
+        "materialType": "设备",
+        "quantity": 10.00,
+        "unit": "台",
+        "warehouse": "主仓库",
+        "location": "A-01-01-01"
+      }
+    ],
+    "total": 5,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/inventory/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含库存列表
+
+【用例3.2】库存入库
+------------------
+接口地址：POST /api/inventory/inbound
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+请求体：
+{
+  "inboundType": "PURCHASE",
+  "warehouseId": 1,
+  "warehouseCode": "WH001",
+  "warehouseName": "主仓库",
+  "sourceType": "PURCHASE_ORDER",
+  "sourceNo": "CGDD202412001",
+  "sourceId": 1,
+  "inboundDate": "2024-12-20",
+  "supplierId": 1,
+  "supplierName": "山东防爆电机厂",
+  "handlerId": 1,
+  "handlerName": "经办人",
+  "receiverId": 1,
+  "receiverName": "收货员",
+  "status": "DRAFT",
+  "details": [
+    {
+      "materialId": 1,
+      "materialCode": "WL001",
+      "materialName": "防爆电机",
+      "specification": "YBK2-280M-4 75KW",
+      "unit": "台",
+      "quantity": 10.00,
+      "unitPrice": 15000.00,
+      "amount": 150000.00,
+      "batchNo": "BATCH2024122001",
+      "productionDate": "2024-12-01",
+      "locationId": 1,
+      "locationCode": "A-01-01-01"
+    }
+  ]
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "inboundId": 2,
+    "inboundNo": "RK2024122002"
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 准备请求体数据
+3. 发送POST请求到 /api/inventory/inbound
+4. 验证返回状态码为200
+5. 验证返回数据中包含新创建的入库单ID和单号
+
+【用例3.3】库存出库
+------------------
+接口地址：POST /api/inventory/outbound
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+请求体：
+{
+  "outboundType": "MAINTENANCE",
+  "warehouseId": 2,
+  "warehouseCode": "WH002",
+  "warehouseName": "备件仓库",
+  "destinationType": "MAINTENANCE_ORDER",
+  "destinationNo": "WX202412001",
+  "destinationId": 1,
+  "outboundDate": "2024-12-05",
+  "deptId": 6,
+  "deptName": "维修部",
+  "recipientId": 1,
+  "recipientName": "维修技师",
+  "handlerId": 1,
+  "handlerName": "经办人",
+  "status": "DRAFT",
+  "details": [
+    {
+      "materialId": 4,
+      "materialCode": "WL004",
+      "materialName": "液压油",
+      "specification": "46号抗磨液压油",
+      "unit": "升",
+      "quantity": 100.00,
+      "unitPrice": 25.00,
+      "amount": 2500.00,
+      "locationId": 4,
+      "locationCode": "C-01-01-01"
+    }
+  ]
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "outboundId": 2,
+    "outboundNo": "CK2024120502"
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 准备请求体数据
+3. 发送POST请求到 /api/inventory/outbound
+4. 验证返回状态码为200
+5. 验证返回数据中包含新创建的出库单ID和单号
+
+================================================================================
+四、维修管理模块
+================================================================================
+
+【用例4.1】维修工单 - 分页查询
+------------------------------
+接口地址：GET /api/maintenance/work-order/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  workOrderNo: (可选，工单编号)
+  status: (可选，状态)
+  assetId: (可选，设备ID)
+
+完整URL示例：
+GET http://localhost:8080/api/maintenance/work-order/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "workOrderId": 1,
+        "workOrderNo": "WX202412001",
+        "workOrderType": "REPAIR",
+        "priority": "HIGH",
+        "assetCode": "ZC001",
+        "assetName": "防爆电机",
+        "faultDescription": "电机轴承磨损，运行有异响",
+        "status": "COMPLETED",
+        "totalCost": 3300.00,
+        "createTime": "2024-12-05 08:30:00"
+      }
+    ],
+    "total": 4,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/maintenance/work-order/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含工单列表
+
+【用例4.2】维修工单 - 创建
+--------------------------
+接口地址：POST /api/maintenance/work-order
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+请求体：
+{
+  "workOrder": {
+    "workOrderType": "REPAIR",
+    "priority": "NORMAL",
+    "assetId": 1,
+    "assetCode": "ZC001",
+    "assetName": "防爆电机",
+    "faultType": "机械故障",
+    "faultDescription": "测试故障描述",
+    "reportedBy": 1,
+    "reportedByName": "报修人",
+    "reportedTime": "2024-12-20 10:00:00",
+    "assignedTeamId": 2,
+    "assignedTeamName": "机械维修组",
+    "status": "PENDING"
+  },
+  "details": [
+    {
+      "stepNo": 1,
+      "stepName": "故障诊断",
+      "stepDescription": "检查设备故障原因",
+      "status": "PENDING"
+    }
+  ]
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "workOrderId": 5,
+    "workOrderNo": "WX202412005"
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 准备请求体数据
+3. 发送POST请求到 /api/maintenance/work-order
+4. 验证返回状态码为200
+5. 验证返回数据中包含新创建的工单ID和编号
+
+【用例4.3】维修工单 - 完成
+--------------------------
+接口地址：POST /api/maintenance/work-order/{id}/complete
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+路径参数：
+  id: 维修工单ID（例如：1）
+
+完整URL示例：
+POST http://localhost:8080/api/maintenance/work-order/1/complete
+
+请求体：
+{
+  "actualEndTime": "2024-12-20 16:00:00",
+  "completionRate": 100.00,
+  "qualityScore": 9.5,
+  "qualityComment": "维修完成，设备运行正常"
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": null
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 使用已创建的维修工单ID
+3. 发送POST请求到 /api/maintenance/work-order/{id}/complete
+4. 验证返回状态码为200
+5. 验证工单状态已更新为COMPLETED
+
+================================================================================
+五、预警模块
+================================================================================
+
+【用例5.1】预警规则 - 分页查询
+------------------------------
+接口地址：GET /api/warning/rule/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  ruleCode: (可选，规则编码)
+  ruleName: (可选，规则名称)
+  ruleType: (可选，规则类型)
+  isEnabled: (可选，是否启用)
+
+完整URL示例：
+GET http://localhost:8080/api/warning/rule/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "ruleId": 1,
+        "ruleCode": "WX001",
+        "ruleName": "防爆证书到期预警",
+        "ruleType": "ASSET",
+        "warningCategory": "EXPLOSION_PROOF",
+        "isEnabled": 1,
+        "checkFrequency": "DAILY"
+      }
+    ],
+    "total": 3,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/warning/rule/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含预警规则列表
+
+【用例5.2】预警记录 - 分页查询
+------------------------------
+接口地址：GET /api/warning/record/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  warningType: (可选，预警类型)
+  warningLevelId: (可选，预警级别ID)
+  status: (可选，状态)
+  sourceType: (可选，来源类型)
+
+完整URL示例：
+GET http://localhost:8080/api/warning/record/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "recordId": 1,
+        "ruleCode": "WX001",
+        "ruleName": "防爆证书到期预警",
+        "warningType": "ASSET",
+        "warningCategory": "EXPLOSION_PROOF",
+        "warningLevelCode": "HIGH",
+        "warningTitle": "防爆证书即将到期",
+        "warningContent": "防爆开关(ZC002)的防爆证书将在30天内到期，请及时处理",
+        "sourceCode": "ZC002",
+        "sourceName": "防爆开关",
+        "status": "RESOLVED",
+        "triggerTime": "2024-12-01 08:00:00"
+      }
+    ],
+    "total": 2,
+    "size": 10,
+    "current": 1,
+    "pages": 1
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/warning/record/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含预警记录列表
+
+【用例5.3】预警记录 - 处理
+--------------------------
+接口地址：POST /api/warning/record/{id}/handle
+请求头：
+  Authorization: Bearer {token}
+  Content-Type: application/json
+
+路径参数：
+  id: 预警记录ID（例如：2）
+
+完整URL示例：
+POST http://localhost:8080/api/warning/record/2/handle
+
+请求体：
+{
+  "handleResult": "已联系供应商补货",
+  "status": "RESOLVED"
+}
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": null
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 使用已存在的预警记录ID
+3. 发送POST请求到 /api/warning/record/{id}/handle
+4. 验证返回状态码为200
+5. 验证预警记录状态已更新
+
+================================================================================
+六、资产模块
+================================================================================
+
+【用例6.1】资产查询 - 分页查询
+------------------------------
+接口地址：GET /api/asset/page
+请求头：
+  Authorization: Bearer {token}
+
+请求参数：
+  current: 1
+  size: 10
+  assetCode: (可选，资产编码)
+  assetName: (可选，资产名称)
+  assetType: (可选，资产类型)
+  status: (可选，状态)
+
+完整URL示例：
+GET http://localhost:8080/api/asset/page?current=1&size=10
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "records": [
+      {
+        "assetId": 1,
+        "assetCode": "ZC001",
+        "assetName": "防爆电机",
+        "assetType": "电气设备",
+        "category": "电机",
+        "manufacturer": "山东防爆电机厂",
+        "model": "YBK2-280M-4",
+        "purchasePrice": 15000.00,
+        "status": "0",
+        "location": "主井口车间",
+        "isExplosionProof": "1",
+        "explosionProofExpireDate": "2025-12-31"
+      }
+    ],
+    "total": 15,
+    "size": 10,
+    "current": 1,
+    "pages": 2
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 发送GET请求到 /api/asset/page
+3. 验证返回状态码为200
+4. 验证返回数据中包含资产列表
+
+【用例6.2】资产详情查询
+----------------------
+接口地址：GET /api/asset/{id}
+请求头：
+  Authorization: Bearer {token}
+
+路径参数：
+  id: 资产ID（例如：1）
+
+完整URL示例：
+GET http://localhost:8080/api/asset/1
+
+预期响应（成功）：
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "assetId": 1,
+    "assetCode": "ZC001",
+    "assetName": "防爆电机",
+    "assetType": "电气设备",
+    "category": "电机",
+    "manufacturer": "山东防爆电机厂",
+    "model": "YBK2-280M-4",
+    "serialNumber": "SN2024001",
+    "purchaseDate": "2024-01-15",
+    "purchasePrice": 15000.00,
+    "status": "0",
+    "location": "主井口车间",
+    "deptId": 8,
+    "isExplosionProof": "1",
+    "explosionProofExpireDate": "2025-12-31",
+    "createTime": "2024-01-15 10:00:00",
+    "updateTime": "2024-01-15 10:00:00",
+    "remark": "主提升系统配套设备"
+  }
+}
+
+测试步骤：
+1. 使用登录获取的token
+2. 使用已存在的资产ID
+3. 发送GET请求到 /api/asset/{id}
+4. 验证返回状态码为200
+5. 验证返回数据中包含完整的资产信息
+
+================================================================================
+七、错误场景测试
+================================================================================
+
+【用例7.1】未授权访问
+-------------------
+接口地址：GET /api/purchase/requisition/page
+请求头：无（不包含Authorization）
+
+预期响应（失败）：
+{
+  "code": 401,
+  "msg": "未授权，请先登录",
+  "data": null
+}
+
+测试步骤：
+1. 不提供token
+2. 发送GET请求到需要认证的接口
+3. 验证返回状态码为401
+4. 验证返回错误信息
+
+【用例7.2】无效token
+-------------------
+接口地址：GET /api/purchase/requisition/page
+请求头：
+  Authorization: Bearer invalid_token_12345
+
+预期响应（失败）：
+{
+  "code": 401,
+  "msg": "Token无效或已过期",
+  "data": null
+}
+
+测试步骤：
+1. 使用无效的token
+2. 发送GET请求到需要认证的接口
+3. 验证返回状态码为401
+4. 验证返回错误信息
+
+【用例7.3】权限不足
+-------------------
+接口地址：POST /api/purchase/requisition
+请求头：
+  Authorization: Bearer {token} (使用普通用户token，如inventory_manager)
+
+预期响应（失败）：
+{
+  "code": 403,
+  "msg": "没有访问权限",
+  "data": null
+}
+
+测试步骤：
+1. 使用没有采购权限的用户登录（如inventory_manager）
+2. 获取token
+3. 尝试访问采购模块的创建接口
+4. 验证返回状态码为403
+5. 验证返回权限不足的错误信息
+
+【用例7.4】参数验证失败
+-----------------------
+接口地址：POST /api/auth/login
+请求头：
+  Content-Type: application/json
+
+请求体：
+{
+  "username": "",
+  "password": ""
+}
+
+预期响应（失败）：
+{
+  "code": 400,
+  "msg": "用户名不能为空",
+  "data": null
+}
+
+测试步骤：
+1. 发送登录请求，但用户名或密码为空
+2. 验证返回状态码为400
+3. 验证返回参数验证错误信息
+
+【用例7.5】资源不存在
+--------------------
+接口地址：GET /api/asset/99999
+请求头：
+  Authorization: Bearer {token}
+
+预期响应（失败）：
+{
+  "code": 404,
+  "msg": "资源不存在",
+  "data": null
+}
+
+测试步骤：
+1. 使用不存在的资源ID
+2. 发送GET请求
+3. 验证返回状态码为404
+4. 验证返回资源不存在的错误信息
+
+================================================================================
+八、测试数据准备
+================================================================================
+
+在执行测试用例前，请确保：
+
+1. 系统已启动
+   - 后端服务运行在 http://localhost:8080
+   - 数据库已初始化
+
+2. 测试数据已导入
+   - 执行：导入测试数据.bat
+   - 或执行：complete_test_data.sql
+
+3. 测试账户可用
+   - admin / admin123 (超级管理员)
+   - purchase_manager / 123456 (采购负责人)
+   - inventory_manager / 123456 (库存负责人)
+   - maintenance_manager / 123456 (维修负责人)
+
+================================================================================
+九、测试执行顺序建议
+================================================================================
+
+1. 首先执行认证模块测试（用例1.1、1.2），获取token
+2. 然后执行查询类接口测试（用例2.1、3.1、4.1、5.1、5.2、6.1）
+3. 再执行创建类接口测试（用例2.2、3.2、3.3、4.2）
+4. 最后执行操作类接口测试（用例2.3、4.3、5.3）
+5. 最后执行错误场景测试（用例7.1-7.5）
+
+================================================================================
+十、Postman使用技巧
+================================================================================
+
+1. 设置环境变量
+   - 创建环境：智慧煤矿ERP
+   - 添加变量：
+     * base_url: http://localhost:8080
+     * token: (从登录接口获取后自动设置)
+
+2. 使用Pre-request Script自动获取token
+   - 在需要token的请求前，先执行登录请求
+   - 使用脚本提取token并设置到环境变量
+
+3. 使用Tests脚本验证响应
+   - 验证状态码：pm.response.to.have.status(200)
+   - 验证响应体：pm.response.to.have.jsonBody('code', 200)
+   - 提取数据：var token = pm.response.json().data.token
+
+4. 使用Collection Runner批量执行
+   - 创建测试集合
+   - 使用Collection Runner批量执行所有测试用例
+   - 查看测试报告
+
+================================================================================
+文档版本：v1.0
+最后更新：2024年
+================================================================================
+

@@ -1,0 +1,97 @@
+# API网关配置
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: finance-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/finance/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+            - name: JwtAuthentication
+            - StripPrefix=1
+
+        - id: hr-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/hr/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 15
+                redis-rate-limiter.burstCapacity: 30
+            - name: JwtAuthentication
+            - StripPrefix=1
+
+        - id: supply-chain-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/supply-chain/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+            - name: JwtAuthentication
+            - StripPrefix=1
+
+        - id: production-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/production/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 25
+                redis-rate-limiter.burstCapacity: 50
+            - name: JwtAuthentication
+            - StripPrefix=1
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/auth/realms/coal-erp
+
+# JWT配置
+jwt:
+  secret: coal-erp-api-secret-key-2025
+  expiration: 86400
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+  endpoint:
+    gateway:
+      enabled: true
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.coal.erp.gateway: DEBUG

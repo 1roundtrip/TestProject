@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coal.erp.business.mapper.WarningAlertMapper">
+    
+    <select id="selectByLevelAndStatus" resultType="com.coal.erp.business.domain.WarningAlert">
+        SELECT * FROM warning_alert
+        WHERE alert_level = #{alertLevel}
+        AND status = #{status}
+        ORDER BY create_time DESC
+    </select>
+    
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

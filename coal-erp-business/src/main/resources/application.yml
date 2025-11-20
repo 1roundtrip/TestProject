@@ -1,0 +1,46 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: coal-erp
+  # 允许循环引用（临时方案，已通过重构解决循环依赖）
+  main:
+    allow-circular-references: true
+    # 允许 bean 覆盖，用于替换自动配置的 resourceHandlerMapping
+    allow-bean-definition-overriding: true
+  # 禁用静态资源处理（纯API服务，不需要静态资源）
+  web:
+    resources:
+      add-mappings: false
+
+# 公共配置
+server:
+  port: 8080
+  address: 0.0.0.0  # 监听所有网络接口，允许局域网访问
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.coal.erp.**.domain
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      # 注意：数据库表中没有deleted字段，因此不配置逻辑删除
+      # logic-delete-field: deleted
+      # logic-delete-value: 1
+      # logic-not-delete-value: 0
+
+# JWT配置
+# HS512算法需要至少512位（64字节）的密钥
+jwt:
+  secret: coal-erp-secret-key-for-jwt-token-generation-minimum-512-bits-required-for-hs512-algorithm-security
+  expiration: 86400000

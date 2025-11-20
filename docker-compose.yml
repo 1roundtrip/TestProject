@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: coal-erp-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: coal_erp
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./coal-erp-business/src/main/resources/db:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - coal-erp-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: coal-erp-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - coal-erp-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coal-erp-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=coal_erp
+      - DB_USER=root
+      - DB_PASSWORD=root123456
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - coal-erp-network
+
+networks:
+  coal-erp-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
