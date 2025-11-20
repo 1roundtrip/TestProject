@@ -1,12 +1,8 @@
-====
 智慧煤矿ERP管理系统部署指南
-===
 
 本指南详细说明如何在Windows和Linux系统上部署智慧煤矿ERP管理系统。
 
-==
 一、系统要求
-
 
 1. 后端要求：
    - JDK 1.8 或更高版本
@@ -22,9 +18,8 @@
    - Windows 10/11 或 Windows Server 2016+
    - Linux（Ubuntu 20.04+, CentOS 7+, Debian 10+）
 
-==
 二、Windows系统部署
-==
+
 2.1 环境准备
 
 1. 安装JDK
@@ -133,9 +128,9 @@
    - 或用户名：admin2
    - 密码：admin123
 
-===
+
 三、Linux系统部署
-===
+
 
 3.1 环境准备
 
@@ -273,18 +268,16 @@
    
    b) 配置Nginx：
    编辑 /etc/nginx/sites-available/coal-erp：
+
    
    server {
        listen 80;
        server_name your-domain.com;
-       
-       root /path/to/project/frontend/dist;
+       root/path/to/project/frontend/dist;
        index index.html;
-       
        location / {
            try_files $uri $uri/ /index.html;
        }
-       
        location /api {
            proxy_pass http://localhost:8080;
            proxy_set_header Host $host;
@@ -292,6 +285,7 @@
            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
        }
    }
+
    
    c) 启用配置：
    sudo ln -s /etc/nginx/sites-available/coal-erp /etc/nginx/sites-enabled/
@@ -312,9 +306,9 @@
    sudo firewall-cmd --permanent --add-port=443/tcp
    sudo firewall-cmd --reload
 
-==
+
 四、常见问题
-==
+
 
 4.1 后端启动失败
 
@@ -342,9 +336,8 @@
 2. 使用admin/admin123登录
 3. 在系统管理中配置用户和角色
 
-===
+
 五、启动脚本说明
-==
 
 Windows系统：
 - start-backend.bat：启动后端服务
@@ -360,9 +353,8 @@ Linux系统：
 1. Windows：双击.bat文件即可
 2. Linux：chmod +x *.sh 然后 ./start-*.sh
 
-==
 六、生产环境建议
-==
+
 
 1. 使用Nginx作为反向代理
 2. 配置HTTPS证书
@@ -373,9 +365,7 @@ Linux系统：
 7. 配置防火墙规则
 8. 定期更新系统和依赖
 
-==
 七、技术支持
-==
 
 如遇到问题，请检查：
 1. 日志文件（logs目录）
